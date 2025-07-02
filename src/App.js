@@ -1,23 +1,150 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import { useCallback, useEffect, useState } from "react";
 
 function App() {
+  const [countries, setCountries] = useState([]);
+  const [states, setStates] = useState([]);
+  const [cities, setCities] = useState([]);
+  const [currentData, setCurrentData] = useState({
+    country: null,
+    state: null,
+    city: null,
+  });
+
+  useEffect(() => {
+    fetch("https://crio-location-selector.onrender.com/countries")
+      .then((response) => response.json())
+      .then((data) => setCountries(data))
+      .catch((error) => console.error("Error fetching countries:", error));
+  }, []);
+
+  const fetchStates = useCallback((country) => {
+    setCurrentData((prev) => ({
+      ...prev,
+      country: country,
+    }));
+    fetch(
+      `https://crio-location-selector.onrender.com/country=${country}/states`
+    )
+      .then((response) => response.json())
+      .then((data) => setStates(data))
+      .catch((error) => console.error("Error fetching states:", error));
+  }, []);
+
+  const fetchCities = useCallback((state, country) => {
+    setCurrentData((prev) => ({
+      ...prev,
+      state: state,
+    }));
+    fetch(
+      `https://crio-location-selector.onrender.com/country=${country}/state=${state}/cities`
+    )
+      .then((response) => response.json())
+      .then((data) => setCities(data))
+      .catch((error) => console.error("Error fetching cities:", error));
+  }, []);
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
+      <h2>Select Location</h2>
+      <div
+        className="location-select"
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+        }}
+      >
+        <select
+          id="country-select"
+          style={{ marginRight: "10px", minWidth: "150px", height: "30px" }}
+          onChange={(e) => {
+            const selectedCountry = e.target.value;
+            setStates([]);
+            setCities([]);
+            fetchStates(selectedCountry);
+          }}
+          defaultValue=""
         >
-          Learn React
-        </a>
-      </header>
+          <option disabled selected value="">
+            Select Country
+          </option>
+          {countries?.map((country) => {
+            return (
+              <option key={country} value={country}>
+                {country}
+              </option>
+            );
+          })}
+        </select>
+        <select
+          id="state-select"
+          style={{ marginRight: "10px", minWidth: "150px", height: "30px" }}
+          disabled={!states.length}
+          onChange={(e) => {
+            const selectedState = e.target.value;
+            setCities([]);
+            fetchCities(selectedState, currentData.country);
+          }}
+          defaultValue=""
+        >
+          <option disabled selected value="">
+            Select State
+          </option>
+          {states?.length &&
+            states?.map((state) => {
+              return (
+                <option key={state} value={state}>
+                  {state}
+                </option>
+              );
+            })}
+        </select>
+        <select
+          id="city-select"
+          style={{ minWidth: "150px", height: "30px" }}
+          disabled={!cities.length}
+          onChange={(e) => {
+            const selectedCity = e.target.value;
+            setCurrentData((prev) => ({
+              ...prev,
+              city: selectedCity,
+            }));
+          }}
+          defaultValue=""
+        >
+          <option disabled selected value="">
+            Select City
+          </option>
+          {cities?.length &&
+            cities?.map((city) => {
+              return (
+                <option key={city} value={city}>
+                  {city}
+                </option>
+              );
+            })}
+        </select>
+      </div>
+      {currentData?.country && currentData?.state && currentData?.city && (
+        <div
+          style={{
+            marginTop: "20px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+          }}
+        >
+          <b style={{ marginRight: "5px" }}>You selected </b>
+          <h3>{`${currentData.country},`}</h3>
+          <span style={{ marginLeft: "5px", color: "gray" }}>
+            {currentData.state},
+          </span>
+          <span style={{ marginLeft: "5px", color: "gray" }}>
+            {currentData.city}
+          </span>
+        </div>
+      )}
     </div>
   );
 }
