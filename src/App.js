@@ -11,6 +11,7 @@ function App() {
     city: null,
   });
 
+  // Fetch countries on component mount
   useEffect(() => {
     fetch("https://crio-location-selector.onrender.com/countries")
       .then((response) => response.json())
@@ -18,6 +19,7 @@ function App() {
       .catch((error) => console.error("Error fetching countries:", error));
   }, []);
 
+  // Fetch states when a country is selected
   const fetchStates = useCallback((country) => {
     setCurrentData((prev) => ({
       ...prev,
@@ -31,6 +33,7 @@ function App() {
       .catch((error) => console.error("Error fetching states:", error));
   }, []);
 
+  // Fetch cities when a state is selected
   const fetchCities = useCallback((state, country) => {
     setCurrentData((prev) => ({
       ...prev,
