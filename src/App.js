@@ -135,13 +135,9 @@ function App() {
             justifyContent: "center",
           }}
         >
-          <b style={{ marginRight: "5px" }}>You selected </b>
-          <h3>{`${currentData.country},`}</h3>
-          <span style={{ marginLeft: "5px", color: "gray" }}>
-            {currentData.state},
-          </span>
-          <span style={{ marginLeft: "5px", color: "gray" }}>
-            {currentData.city}
+          <span>
+            You selected {currentData.city}, {currentData.state},{" "}
+            {currentData.country}
           </span>
         </div>
       )}
